@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Genre List</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style type="text/css">
+        body {
+            padding: 20px;
+        }
+
+        .genres td {
+            border: 1px solid lightgray;
+            padding: 5px;
+        }
+
+        a {
+            padding: 2px;
+            margin: 4px;
+        }
+    </style>
+    <script src="/webjars/jquery/3.3.1/jquery.min.js"></script>
+</head>
+<body>
+
+<header class="d-flex flex-column flex-md-row align-items-center p-3 px-md-4 mb-3 bg-white border-bottom shadow-sm">
+    <input onclick="window.history.go(-1); return false;" type="submit" value="Previous page" style="margin: 15px;"/>
+    <a th:href="@{/}" href="index.html" class="h5 my-0 me-md-auto fw-normal">Main page</a>
+    <nav class="my-2 my-md-0 me-md-3">
+        <a th:href="@{/genres/add}" href="genreSave.html" class="btn btn-outline-primary">Add genre</a>
+    </nav>
+</header>
+
+<h2>Genres:</h2>
+
+<table class="genres">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Edit</th>
+        <th>Delete</th>
+    </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+
+<script>
+    function deleteRow(btn) {
+        const value = btn.name
+        $.ajax({
+            url: '/api/genres/',
+            method: 'delete',
+            contentType: "application/json",
+            data: JSON.stringify({id: value}),
+            complete: function (xhr) {
+                if (xhr.status === 200) {
+                    window.location.reload();
+                }
+            }
+        })
+    }
+
+    $(function () {
+        $.get('/api/genres').done(function (genres) {
+            genres.forEach(function (genre) {
+                $('tbody').append(`
+                    <tr>
+                        <td>${genre.id}</td>
+                        <td>
+                            <a href="/genres/id?id=${genre.id}">${genre.name}</a>
+                        </td>
+                        <td>
+                            <a href="/genres/edit?id=${genre.id}">Edit</a>
+                        </td>
+                        <td>
+                            <input name="${genre.id}" type="button" value="Delete" id="input"
+                            onclick="deleteRow(this)">
+                        </td>
+                    </tr>
+                `)
+            });
+        })
+    });
+</script>
+
+</body>
+</html>

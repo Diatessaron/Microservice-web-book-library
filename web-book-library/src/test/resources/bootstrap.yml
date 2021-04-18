@@ -1,0 +1,11 @@
+spring:
+  data:
+    mongodb:
+      port: 0
+      database: library
+
+mongock:
+  enabled: false
+  runner-type: "InitializingBean"
+  change-logs-scan-package:
+    - ru.otus.webbooklibrary.mongock.changelog

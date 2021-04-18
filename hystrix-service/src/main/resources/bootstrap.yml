@@ -1,0 +1,12 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: hystrix-service
+
+management:
+  endpoint:
+    web:
+      exposure:
+        include: *

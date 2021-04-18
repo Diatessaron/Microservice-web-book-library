@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Book by Author</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style type="text/css">
+        body {
+            padding: 20px;
+        }
+
+        .book td {
+            border: 1px solid lightgray;
+            padding: 5px;
+        }
+    </style>
+    <script src="/webjars/jquery/3.3.1/jquery.min.js"></script>
+</head>
+<body>
+
+<header class="d-flex flex-column flex-md-row align-items-center p-3 px-md-4 mb-3 bg-white border-bottom shadow-sm">
+    <input onclick="window.history.go(-1); return false;" type="submit" value="Previous page" style="margin: 15px;"/>
+    <a th:href="@{/}" href="index.html" class="h5 my-0 me-md-auto fw-normal">Main page</a>
+</header>
+
+<h1>Book:</h1>
+
+<table class="book">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Title</th>
+        <th>Author</th>
+        <th>Genre</th>
+        <th>Action</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+    </tbody>
+</table>
+
+<script th:inline="javascript">
+    const bookAuthor = /*[[${book[0].author.name}]]*/ '';
+
+    function deleteRow(btn) {
+        const value = btn.name
+        $.ajax({
+            url: '/api/books/',
+            method: 'delete',
+            contentType: "application/json",
+            data: JSON.stringify({id: value}),
+            complete: function (xhr) {
+                if (xhr.status === 200) {
+                    document.location.href = '/books'
+                }
+            }
+        })
+    }
+
+    $(function () {
+        $.get('/api/books/author/' + bookAuthor).done(function (books) {
+            books.forEach(function (book) {
+                $('tbody').append(`
+                    <tr>
+                        <td>${book.id}</td>
+                        <td>
+                            <a href="/books/id?id=${book.id}">${book.title}</a>
+                        </td>
+                        <td>
+                            <a href="/books/author/${book.author.name}">${book.author.name}</a>
+                        </td>
+                        <td>
+                            <a href="/books/genre/${book.genre.name}">${book.genre.name}</a>
+                        </td>
+                        <td>
+                            <a href="/books/edit?id=${book.id}">Edit</a>
+                        </td>
+                        <td>
+                            <input name="${book.id}" type="button" value="Delete" id="input"
+                            onclick="deleteRow(this)">
+                        </td>
+                    </tr>
+                `)
+            });
+        })
+    });
+</script>
+
+</body>
+</html>
