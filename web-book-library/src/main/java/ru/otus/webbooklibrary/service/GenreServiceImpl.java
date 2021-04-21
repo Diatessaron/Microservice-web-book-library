@@ -1,5 +1,6 @@
 package ru.otus.webbooklibrary.service;
 
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.otus.webbooklibrary.domain.Book;
@@ -19,6 +20,7 @@ public class GenreServiceImpl implements GenreService {
         this.bookRepository = bookRepository;
     }
 
+    @HystrixCommand(defaultFallback = "getEmptyStringResult")
     @Transactional
     @Override
     public String saveGenre(String name) {
@@ -28,12 +30,14 @@ public class GenreServiceImpl implements GenreService {
         return String.format("You successfully saved a %s to repository", genre.getName());
     }
 
+    @HystrixCommand(defaultFallback = "getEmptyGenreResult")
     @Transactional(readOnly = true)
     @Override
     public Genre getGenreById(String id){
         return genreRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Incorrect genre id"));
     }
 
+    @HystrixCommand(defaultFallback = "getEmptyGenreResult")
     @Transactional(readOnly = true)
     @Override
     public Genre getGenreByName(String name) {
@@ -41,12 +45,14 @@ public class GenreServiceImpl implements GenreService {
                 (() -> new IllegalArgumentException("Incorrect name"));
     }
 
+    @HystrixCommand(defaultFallback = "getEmptyGenreListResult")
     @Transactional(readOnly = true)
     @Override
     public List<Genre> getAll() {
         return genreRepository.findAll();
     }
 
+    @HystrixCommand(defaultFallback = "getEmptyStringResult")
     @Transactional
     @Override
     public String updateGenre(String id, String name) {
@@ -67,6 +73,7 @@ public class GenreServiceImpl implements GenreService {
         return String.format("%s was updated", name);
     }
 
+    @HystrixCommand(defaultFallback = "getEmptyStringResult")
     @Transactional
     @Override
     public String deleteGenre(String id) {
@@ -76,5 +83,21 @@ public class GenreServiceImpl implements GenreService {
         bookRepository.deleteByGenre_Name(genre.getName());
 
         return String.format("%s was deleted", genre.getName());
+    }
+
+    public String getEmptyStringResult() {
+        return "Operation can not be executed.";
+    }
+
+    public Genre getEmptyGenreResult() {
+        Genre genre = new Genre();
+        genre.setId("N/A");
+        genre.setName("N/A");
+
+        return genre;
+    }
+
+    public List<Genre> getEmptyGenreListResult() {
+        return List.of();
     }
 }

@@ -1,5 +1,6 @@
 package ru.otus.webbooklibrary.service;
 
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.otus.webbooklibrary.domain.Author;
@@ -29,6 +30,7 @@ public class BookServiceImpl implements BookService {
         this.commentRepository = commentRepository;
     }
 
+    @HystrixCommand
     @Transactional
     @Override
     public void saveBook(String title, String authorNameParameter, String genreNameParameter) {
@@ -39,30 +41,35 @@ public class BookServiceImpl implements BookService {
         bookRepository.save(book);
     }
 
+    @HystrixCommand(defaultFallback = "getEmptyBookResult")
     @Transactional(readOnly = true)
     @Override
     public Book getBookById(String id) {
         return bookRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Incorrect book id"));
     }
 
+    @HystrixCommand(defaultFallback = "getEmptyBookListResult")
     @Transactional(readOnly = true)
     @Override
     public List<Book> getBookByTitle(String title) {
         return bookRepository.findByTitle(title);
     }
 
+    @HystrixCommand(defaultFallback = "getEmptyBookListResult")
     @Transactional(readOnly = true)
     @Override
     public List<Book> getBookByAuthor(String author) {
         return bookRepository.findByAuthor_Name(author);
     }
 
+    @HystrixCommand(defaultFallback = "getEmptyBookListResult")
     @Transactional(readOnly = true)
     @Override
     public List<Book> getBookByGenre(String genre) {
         return bookRepository.findByGenre_Name(genre);
     }
 
+    @HystrixCommand(defaultFallback = "getEmptyBookResult")
     @Transactional(readOnly = true)
     @Override
     public Book getBookByComment(String commentId) {
@@ -70,12 +77,14 @@ public class BookServiceImpl implements BookService {
                 .orElseThrow(() -> new IllegalArgumentException("Incorrect comment id")).getBook().getTitle()).get(0);
     }
 
+    @HystrixCommand(defaultFallback = "getEmptyBookListResult")
     @Transactional(readOnly = true)
     @Override
     public List<Book> getAll() {
         return bookRepository.findAll();
     }
 
+    @HystrixCommand
     @Transactional
     @Override
     public void updateBook(String id, String title, String authorNameParameter,
@@ -97,12 +106,26 @@ public class BookServiceImpl implements BookService {
         commentRepository.saveAll(commentList);
     }
 
+    @HystrixCommand
     @Transactional
     @Override
     public void deleteBook(String id) {
         commentRepository.deleteByBook_Title(bookRepository.findById(id).orElseThrow
                 (() -> new IllegalArgumentException("Incorrect book id")).getTitle());
         bookRepository.deleteById(id);
+    }
+
+    public Book getEmptyBookResult(){
+        Book book = new Book();
+        book.setId("N/A");
+        book.setTitle("N/A");
+        book.setAuthor(new Author("N/A"));
+        book.setGenre(new Genre("N/A"));
+
+        return book;
+    }
+    public List<Book> getEmptyBookListResult(){
+        return List.of();
     }
 
     private Author getAuthor(String authorName) {

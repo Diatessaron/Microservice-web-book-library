@@ -1,12 +1,6 @@
 server:
   port: 8080
 
-management:
-  endpoints:
-    web:
-      exposure:
-        include: *
-
 spring:
   application:
     name: book-service
@@ -20,3 +14,17 @@ mongock:
   runner-type: "InitializingBean"
   change-logs-scan-package:
     - ru.otus.webbooklibrary.mongock.changelog
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, logfile, metrics, prometheus
+
+hystrix:
+  command:
+    default:
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 3000

@@ -6,7 +6,7 @@ spring:
     name: hystrix-service
 
 management:
-  endpoint:
+  endpoints:
     web:
       exposure:
-        include: *
+        include: health, logfile, metrics, prometheus

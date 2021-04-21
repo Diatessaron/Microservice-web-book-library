@@ -1,5 +1,6 @@
 package ru.otus.webbooklibrary.service;
 
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.otus.webbooklibrary.domain.Comment;
@@ -18,6 +19,7 @@ public class CommentServiceImpl implements CommentService {
         this.bookRepository = bookRepository;
     }
 
+    @HystrixCommand(defaultFallback = "getEmptyStringResult")
     @Transactional
     @Override
     public String saveComment(String bookTitle, String commentContent) {
@@ -28,6 +30,7 @@ public class CommentServiceImpl implements CommentService {
         return "You successfully added a comment to " + bookTitle;
     }
 
+    @HystrixCommand(defaultFallback = "getEmptyCommentResult")
     @Transactional(readOnly = true)
     @Override
     public Comment getCommentById(String id){
@@ -35,24 +38,28 @@ public class CommentServiceImpl implements CommentService {
                 (() -> new IllegalArgumentException("Incorrect comment id"));
     }
 
+    @HystrixCommand(defaultFallback = "getEmptyCommentListResult")
     @Transactional(readOnly = true)
     @Override
     public List<Comment> getCommentByContent(String content) {
         return commentRepository.findByContent(content);
     }
 
+    @HystrixCommand(defaultFallback = "getEmptyCommentListResult")
     @Transactional(readOnly = true)
     @Override
     public List<Comment> getCommentsByBook(String bookTitle) {
         return commentRepository.findByBook_Title(bookTitle);
     }
 
+    @HystrixCommand(defaultFallback = "getEmptyCommentListResult")
     @Transactional(readOnly = true)
     @Override
     public List<Comment> getAll() {
         return commentRepository.findAll();
     }
 
+    @HystrixCommand(defaultFallback = "getEmptyStringResult")
     @Transactional
     @Override
     public String updateComment(String id, String commentContent) {
@@ -67,6 +74,7 @@ public class CommentServiceImpl implements CommentService {
         return comment.getBook().getTitle() + " comment was updated";
     }
 
+    @HystrixCommand(defaultFallback = "getEmptyStringResult")
     @Transactional
     @Override
     public String deleteComment(String id) {
@@ -76,5 +84,22 @@ public class CommentServiceImpl implements CommentService {
         commentRepository.deleteById(id);
 
         return comment.getBook().getTitle() + " comment was deleted";
+    }
+
+    public String getEmptyStringResult() {
+        return "Operation can not be executed.";
+    }
+
+    public Comment getEmptyCommentResult() {
+        Comment comment = new Comment();
+        comment.setId("N/A");
+        comment.setContent("N/A");
+        comment.setBook("N/A");
+
+        return comment;
+    }
+
+    public List<Comment> getEmptyCommentListResult() {
+        return List.of();
     }
 }
