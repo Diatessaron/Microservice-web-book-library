@@ -59,7 +59,13 @@ class GenreServiceImplTest {
 
     @Test
     void shouldThrowExceptionAfterGetGenreByNameMethodInvocation() {
-        assertThrows(IllegalArgumentException.class, () -> service.getGenreByName("genre"));
+        Genre expected = new Genre();
+        expected.setId("N/A");
+        expected.setName("N/A");
+
+        Genre actual = service.getGenreByName("genre");
+
+        assertEquals(expected, actual);
     }
 
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)

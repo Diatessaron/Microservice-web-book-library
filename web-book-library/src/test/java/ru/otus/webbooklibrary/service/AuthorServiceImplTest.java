@@ -78,8 +78,8 @@ class AuthorServiceImplTest {
 
         final InOrder inOrder = inOrder(authorRepository, bookRepository);
         inOrder.verify(authorRepository).findById("James Joyce");
-        inOrder.verify(authorRepository).save(author);
         inOrder.verify(bookRepository).findByAuthor_Name("James Joyce");
+        inOrder.verify(authorRepository).save(author);
     }
 
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
